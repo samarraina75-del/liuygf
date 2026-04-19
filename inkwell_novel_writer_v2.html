@@ -1,0 +1,450 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+.app{display:grid;grid-template-columns:280px 1fr;min-height:700px;font-family:'IBM Plex Mono',monospace;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;}
+.sidebar{background:var(--color-background-secondary);border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;overflow-y:auto;max-height:700px;}
+.sidebar-header{padding:16px 16px 12px;border-bottom:0.5px solid var(--color-border-tertiary);flex-shrink:0;}
+.app-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;color:var(--color-text-primary);letter-spacing:-0.3px;}
+.app-sub{font-size:9px;color:var(--color-text-tertiary);margin-top:2px;letter-spacing:0.1em;text-transform:uppercase;}
+.sec{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-text-tertiary);padding:12px 14px 5px;}
+.fr{padding:0 12px 8px;display:flex;flex-direction:column;gap:4px;}
+.fl{font-size:9px;letter-spacing:0.09em;text-transform:uppercase;color:var(--color-text-tertiary);}
+.fi,.fta,.fsel{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--color-text-primary);background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:6px 9px;width:100%;resize:none;}
+.fta{line-height:1.5;}
+.ref-row{display:flex;gap:4px;align-items:center;margin-bottom:4px;}
+.ref-row .fi{flex:1;font-size:10px;}
+.ref-del{width:22px;height:22px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-tertiary);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ref-del:hover{color:var(--color-text-danger);border-color:var(--color-border-tertiary);}
+.add-ref-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 10px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary);cursor:pointer;margin:0 12px 8px;transition:all .15s;}
+.add-ref-btn:hover{color:var(--color-text-primary);border-color:var(--color-border-secondary);}
+.genre-wrap{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 8px;}
+.gbtn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:999px;background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s;}
+.gbtn:hover{color:var(--color-text-primary);border-color:var(--color-border-secondary);}
+.gbtn.active{background:var(--color-background-primary);color:var(--color-text-primary);border-color:var(--color-border-primary);}
+.tone-wrap{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 8px;}
+.tpill{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:999px;background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s;}
+.tpill:hover{color:var(--color-text-primary);}
+.tpill.active{background:var(--color-background-primary);color:var(--color-text-primary);border-color:var(--color-border-primary);}
+.srow{padding:0 12px 8px;display:flex;flex-direction:column;gap:3px;}
+.slr{display:flex;justify-content:space-between;font-size:10px;color:var(--color-text-tertiary);}
+.num-row{display:flex;gap:4px;padding:0 12px 8px;align-items:center;}
+.num-row .fi{width:60px;text-align:center;}
+.num-row span{font-size:10px;color:var(--color-text-tertiary);}
+.sb-footer{margin-top:auto;padding:12px;border-top:0.5px solid var(--color-border-tertiary);flex-shrink:0;}
+.status-line{font-size:10px;color:var(--color-text-tertiary);margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.dot{width:6px;height:6px;border-radius:50%;background:#888;flex-shrink:0;transition:background .3s;}
+.dot.ok{background:#3B6D11;}.dot.err{background:#A32D2D;}
+.gen-btn{width:100%;padding:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);cursor:pointer;letter-spacing:.05em;transition:opacity .15s;}
+.gen-btn:hover{opacity:.8;}.gen-btn:disabled{opacity:.35;cursor:not-allowed;}
+.main{display:flex;flex-direction:column;min-height:700px;}
+.toolbar{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:0.5px solid var(--color-border-tertiary);flex-wrap:wrap;}
+.ch-tabs{display:flex;gap:4px;overflow-x:auto;flex:1;min-width:0;}
+.chtab{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 10px;border:0.5px solid var(--color-border-tertiary);border-radius:999px;background:transparent;color:var(--color-text-secondary);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.chtab.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary);}
+.chtab:hover:not(.active){border-color:var(--color-border-secondary);color:var(--color-text-primary);}
+.tb-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;}
+.tb-btn:hover{color:var(--color-text-primary);border-color:var(--color-border-secondary);}
+.tb-btn:disabled{opacity:.35;cursor:not-allowed;}
+.progress-bar-wrap{padding:0 14px 8px;display:none;}
+.progress-bar-bg{height:3px;background:var(--color-background-tertiary);border-radius:2px;overflow:hidden;}
+.progress-bar-fill{height:3px;background:var(--color-text-primary);border-radius:2px;transition:width .4s;}
+.progress-label{font-size:10px;color:var(--color-text-tertiary);margin-top:4px;}
+.err-banner{margin:0 14px 10px;padding:7px 11px;background:var(--color-background-danger);color:var(--color-text-danger);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:11px;display:none;}
+.editor{flex:1;display:flex;flex-direction:column;padding:18px 22px;}
+.ch-title-inp{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;color:var(--color-text-primary);background:transparent;border:none;outline:none;width:100%;margin-bottom:5px;letter-spacing:-0.2px;}
+.ch-title-inp::placeholder{color:var(--color-text-tertiary);}
+.ch-prompt-inp{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--color-text-secondary);background:transparent;border:none;border-bottom:0.5px solid var(--color-border-tertiary);outline:none;width:100%;margin-bottom:14px;padding-bottom:7px;}
+.ch-prompt-inp::placeholder{color:var(--color-text-tertiary);}
+.prose{flex:1;font-family:'Playfair Display',serif;font-size:14px;line-height:1.9;color:var(--color-text-primary);background:transparent;border:none;outline:none;resize:none;width:100%;min-height:340px;}
+.prose::placeholder{color:var(--color-text-tertiary);font-style:italic;}
+.main-footer{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;border-top:0.5px solid var(--color-border-tertiary);flex-wrap:wrap;gap:6px;}
+.wc{font-size:10px;color:var(--color-text-tertiary);}
+.act-row{display:flex;gap:5px;}
+.act-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 9px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s;}
+.act-btn:hover{color:var(--color-text-primary);border-color:var(--color-border-secondary);}
+.act-btn:disabled{opacity:.35;cursor:not-allowed;}
+.bulk-progress{padding:0 14px 10px;display:none;}
+.bulk-item{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:10px;color:var(--color-text-secondary);}
+.bulk-dot{width:7px;height:7px;border-radius:50%;background:var(--color-border-tertiary);flex-shrink:0;}
+.bulk-dot.done{background:#3B6D11;}.bulk-dot.active{background:#BA7517;}.bulk-dot.err{background:#A32D2D;}
+</style>
+
+<h2 class="sr-only">Inkwell — Ollama novel writer with reference URLs, bulk chapter generation, and 2500+ words per chapter</h2>
+
+<div class="app">
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="app-title">Inkwell</div>
+    <div class="app-sub">Ollama Novel Writer v2</div>
+  </div>
+
+  <div class="sec">Ollama endpoint</div>
+  <div class="fr"><input class="fi" id="ollamaUrl" value="http://localhost:11434" /></div>
+
+  <div class="sec">Model</div>
+  <div class="fr"><select class="fsel" id="modelSel"><option value="">— checking... —</option></select></div>
+
+  <div class="sec">Reference novels (URLs)</div>
+  <div id="refList"></div>
+  <button class="add-ref-btn" id="addRefBtn">+ add reference URL</button>
+
+  <div class="sec">Novel setup</div>
+  <div class="fr"><span class="fl">Title</span><input class="fi" id="novelTitle" placeholder="The Obsidian Codex" /></div>
+  <div class="fr"><span class="fl">Characters</span><textarea class="fta" id="chars" rows="3" placeholder="Kael — exiled cartographer&#10;Mira — clockwork oracle&#10;The Architect — unseen antagonist"></textarea></div>
+  <div class="fr"><span class="fl">World / setting</span><textarea class="fta" id="world" rows="2" placeholder="A crumbling empire of floating islands..."></textarea></div>
+  <div class="fr"><span class="fl">Synopsis / arc</span><textarea class="fta" id="synopsis" rows="3" placeholder="Overall story arc and themes..."></textarea></div>
+
+  <div class="sec">Genre</div>
+  <div class="genre-wrap" id="genreWrap">
+    <button class="gbtn active" data-g="Fantasy">Fantasy</button>
+    <button class="gbtn" data-g="Sci-Fi">Sci-Fi</button>
+    <button class="gbtn" data-g="Mystery">Mystery</button>
+    <button class="gbtn" data-g="Romance">Romance</button>
+    <button class="gbtn" data-g="Thriller">Thriller</button>
+    <button class="gbtn" data-g="Horror">Horror</button>
+    <button class="gbtn" data-g="Historical Fiction">Historical</button>
+    <button class="gbtn" data-g="Literary Fiction">Literary</button>
+    <button class="gbtn" data-g="Gothic">Gothic</button>
+    <button class="gbtn" data-g="Dystopian">Dystopian</button>
+    <button class="gbtn" data-g="Magical Realism">Mag. Realism</button>
+    <button class="gbtn" data-g="Western">Western</button>
+    <button class="gbtn" data-g="Cyberpunk">Cyberpunk</button>
+    <button class="gbtn" data-g="Steampunk">Steampunk</button>
+    <button class="gbtn" data-g="Dark Fantasy">Dark Fantasy</button>
+    <button class="gbtn" data-g="Crime">Crime</button>
+    <button class="gbtn" data-g="Mythology">Mythology</button>
+    <button class="gbtn" data-g="Erotica">Erotica</button>
+    <button class="gbtn" data-g="Adventure">Adventure</button>
+    <button class="gbtn" data-g="Satire">Satire</button>
+  </div>
+
+  <div class="sec">Tone</div>
+  <div class="tone-wrap" id="toneWrap">
+    <button class="tpill active" data-t="Literary">Literary</button>
+    <button class="tpill" data-t="Lyrical">Lyrical</button>
+    <button class="tpill" data-t="Terse">Terse</button>
+    <button class="tpill" data-t="Humorous">Humorous</button>
+    <button class="tpill" data-t="Dark">Dark</button>
+    <button class="tpill" data-t="Cinematic">Cinematic</button>
+    <button class="tpill" data-t="Visceral">Visceral</button>
+    <button class="tpill" data-t="Poetic">Poetic</button>
+  </div>
+
+  <div class="sec">Words per chapter (min 2500)</div>
+  <div class="srow">
+    <div class="slr"><span>2500</span><span id="wpcVal">2500</span><span>6000</span></div>
+    <input type="range" id="wpcSlider" min="2500" max="6000" step="100" value="2500" style="width:100%;" />
+  </div>
+
+  <div class="sec">Chapters to bulk-generate</div>
+  <div class="num-row">
+    <input class="fi" id="bulkCount" type="number" min="1" max="2000" value="10" />
+    <span>chapters (up to 2000)</span>
+  </div>
+
+  <div class="sec">Temperature</div>
+  <div class="srow">
+    <div class="slr"><span>Focused</span><span id="tempVal">0.8</span><span>Wild</span></div>
+    <input type="range" id="tempSlider" min="0" max="2" step="0.1" value="0.8" style="width:100%;" />
+  </div>
+
+  <div class="sb-footer">
+    <div class="status-line"><span class="dot" id="dot"></span><span id="statusTxt">checking ollama…</span></div>
+    <button class="gen-btn" id="genBtn" disabled>Generate chapter</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="toolbar">
+    <div class="ch-tabs" id="chTabs"></div>
+    <button class="tb-btn" id="addChBtn">+ chapter</button>
+    <button class="tb-btn" id="bulkGenBtn" disabled>Bulk generate</button>
+    <button class="tb-btn" id="stopBtn" style="display:none;color:var(--color-text-danger);">Stop</button>
+  </div>
+
+  <div class="progress-bar-wrap" id="pbWrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="pbFill" style="width:0%"></div></div>
+    <div class="progress-label" id="pbLabel"></div>
+  </div>
+
+  <div class="err-banner" id="errBanner"></div>
+
+  <div class="bulk-progress" id="bulkProg"></div>
+
+  <div class="editor">
+    <input class="ch-title-inp" id="chTitle" placeholder="Chapter I — The Edge of the Map" />
+    <input class="ch-prompt-inp" id="chPromptInp" placeholder="What happens in this chapter? (brief scene / beat description)" />
+    <textarea class="prose" id="prose" placeholder="Your story begins here…&#10;&#10;Write freely, or use Generate to let the AI write from your prompt."></textarea>
+  </div>
+
+  <div class="main-footer">
+    <span class="wc" id="wc">0 words</span>
+    <div class="act-row">
+      <button class="act-btn" id="continueBtn" disabled>Continue</button>
+      <button class="act-btn" id="rewriteBtn" disabled>Rewrite selection</button>
+      <button class="act-btn" id="exportBtn">Export .txt</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const state={
+  chapters:[{id:1,title:'',prompt:'',prose:''}],
+  active:0,
+  genre:'Fantasy',
+  tone:'Literary',
+  streaming:false,
+  stopRequested:false,
+  refs:[]
+};
+
+function ollamaUrl(){return ($('ollamaUrl').value||'http://localhost:11434').replace(/\/$/,'');}
+
+async function checkOllama(){
+  try{
+    const r=await fetch(ollamaUrl()+'/api/tags',{signal:AbortSignal.timeout(4000)});
+    if(!r.ok)throw 0;
+    const d=await r.json();
+    $('dot').className='dot ok';$('statusTxt').textContent='ollama connected';
+    $('genBtn').disabled=false;$('continueBtn').disabled=false;$('rewriteBtn').disabled=false;$('bulkGenBtn').disabled=false;
+    const sel=$('modelSel');const ms=(d.models||[]).map(m=>m.name);
+    sel.innerHTML='<option value="">— select model —</option>';
+    ms.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o);});
+    if(ms.length)sel.value=ms[0];
+  }catch{
+    $('dot').className='dot err';$('statusTxt').textContent='ollama not reachable';
+    $('genBtn').disabled=true;$('continueBtn').disabled=true;$('rewriteBtn').disabled=true;$('bulkGenBtn').disabled=true;
+  }
+}
+
+function renderRefs(){
+  const list=$('refList');list.innerHTML='';
+  state.refs.forEach((url,i)=>{
+    const row=document.createElement('div');row.className='ref-row';row.style.padding='0 12px';
+    const inp=document.createElement('input');inp.className='fi';inp.placeholder='https://...';inp.value=url;inp.style.fontSize='10px';
+    inp.oninput=e=>{state.refs[i]=e.target.value;};
+    const del=document.createElement('button');del.className='ref-del';del.textContent='×';
+    del.onclick=()=>{state.refs.splice(i,1);renderRefs();};
+    row.appendChild(inp);row.appendChild(del);list.appendChild(row);
+  });
+  const spacer=document.createElement('div');spacer.style.height='4px';list.appendChild(spacer);
+}
+
+$('addRefBtn').onclick=()=>{state.refs.push('');renderRefs();};
+renderRefs();
+
+function refContext(){
+  const urls=state.refs.filter(u=>u.trim());
+  if(!urls.length)return '';
+  return `\n\nReference novels (study and mirror the style, pacing, and prose quality from these works):\n${urls.map((u,i)=>`${i+1}. ${u}`).join('\n')}`;
+}
+
+function buildPrompt(chPrompt,existing,mode,chapterNum){
+  const title=$('novelTitle').value||'Untitled Novel';
+  const chars=$('chars').value||'unnamed characters';
+  const world=$('world').value||'';
+  const synopsis=$('synopsis').value||'';
+  const genre=state.genre;const tone=state.tone;
+  const wpc=parseInt($('wpcSlider').value)||2500;
+  const chTitle=state.chapters[state.active].title||(chapterNum?`Chapter ${chapterNum}`:'this chapter');
+  const refCtx=refContext();
+
+  let instruction='';
+  if(mode==='generate'){
+    instruction=`Write a complete, detailed chapter of AT LEAST ${wpc} words. This is chapter ${chapterNum||''} titled "${chTitle}". Do not stop early — continue writing until you have reached the full word count. Use vivid scene-setting, rich character interiority, dialogue, and action.`;
+  }else if(mode==='continue'){
+    instruction=`Continue the story for AT LEAST ${wpc} words. Pick up exactly where the existing text ends, maintaining voice and momentum.`;
+  }else if(mode==='rewrite'){
+    instruction=`Rewrite the following passage in a ${tone.toLowerCase()} ${genre.toLowerCase()} style. Match the original scene but improve prose quality, depth, and flow.`;
+  }
+
+  return `You are a master novelist writing a ${genre} novel with a ${tone} tone.
+
+Novel: "${title}"
+${world?`World/Setting: ${world}`:''}
+Characters: ${chars}
+${synopsis?`Story arc: ${synopsis}`:''}
+Chapter prompt: ${chPrompt||'Continue the narrative naturally'}${refCtx}
+
+${instruction}
+
+${existing?`Existing text:\n${existing}\n`:''}
+
+IMPORTANT: Write only prose. No chapter headings, no meta-commentary, no word count notes. Begin the story immediately and write until the chapter is complete.`;
+}
+
+async function streamGen(prompt,mode,onChunk,onDone,onErr){
+  const model=$('modelSel').value;
+  if(!model){showErr('Select an Ollama model first.');return;}
+  const temp=parseFloat($('tempSlider').value);
+  try{
+    const res=await fetch(ollamaUrl()+'/api/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model,prompt,stream:true,options:{temperature:temp,num_predict:8192}})
+    });
+    if(!res.ok)throw new Error(await res.text());
+    const reader=res.body.getReader();const dec=new TextDecoder();let buf='';
+    while(true){
+      if(state.stopRequested){reader.cancel();break;}
+      const{done,value}=await reader.read();
+      if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop();
+      for(const line of lines){
+        if(!line.trim())continue;
+        try{const obj=JSON.parse(line);if(obj.response){onChunk(obj.response);}if(obj.done)break;}catch{}
+      }
+    }
+    onDone();
+  }catch(e){onErr(e.message);}
+}
+
+function showErr(msg){const b=$('errBanner');b.textContent=msg;b.style.display='block';setTimeout(()=>{b.style.display='none';},9000);}
+function wc(txt){return txt.trim().split(/\s+/).filter(Boolean).length;}
+function updateWC(){$('wc').textContent=wc($('prose').value)+' words';}
+function saveChapter(){const c=state.chapters[state.active];c.title=$('chTitle').value;c.prompt=$('chPromptInp').value;c.prose=$('prose').value;}
+function loadChapter(idx){saveChapter();state.active=idx;const c=state.chapters[idx];$('chTitle').value=c.title;$('chPromptInp').value=c.prompt;$('prose').value=c.prose;updateWC();renderTabs();}
+
+function renderTabs(){
+  const tabs=$('chTabs');tabs.innerHTML='';
+  state.chapters.forEach((c,i)=>{
+    const btn=document.createElement('button');btn.className='chtab'+(i===state.active?' active':'');
+    btn.textContent=c.title||(i===0?'Ch. 1':`Ch. ${i+1}`);
+    btn.onclick=()=>loadChapter(i);tabs.appendChild(btn);
+  });
+}
+
+$('addChBtn').onclick=()=>{saveChapter();state.chapters.push({id:Date.now(),title:'',prompt:'',prose:''});loadChapter(state.chapters.length-1);};
+
+function setStreaming(v){
+  state.streaming=v;
+  $('genBtn').disabled=v;$('continueBtn').disabled=v;$('rewriteBtn').disabled=v;$('bulkGenBtn').disabled=v;
+  $('stopBtn').style.display=v?'':'none';
+}
+
+$('stopBtn').onclick=()=>{state.stopRequested=true;};
+
+$('genBtn').onclick=()=>{
+  if(state.streaming)return;
+  saveChapter();state.stopRequested=false;setStreaming(true);
+  $('prose').value='';
+  const chNum=state.active+1;
+  const p=buildPrompt($('chPromptInp').value,'','generate',chNum);
+  streamGen(p,'generate',
+    chunk=>{$('prose').value+=chunk;$('prose').scrollTop=$('prose').scrollHeight;updateWC();saveChapter();},
+    ()=>{setStreaming(false);saveChapter();},
+    e=>{showErr('Generation error: '+e);setStreaming(false);}
+  );
+};
+
+$('continueBtn').onclick=()=>{
+  if(state.streaming)return;
+  saveChapter();state.stopRequested=false;setStreaming(true);
+  const p=buildPrompt($('chPromptInp').value,$('prose').value,'continue',state.active+1);
+  streamGen(p,'continue',
+    chunk=>{$('prose').value+=chunk;$('prose').scrollTop=$('prose').scrollHeight;updateWC();saveChapter();},
+    ()=>{setStreaming(false);saveChapter();},
+    e=>{showErr('Continue error: '+e);setStreaming(false);}
+  );
+};
+
+$('rewriteBtn').onclick=()=>{
+  if(state.streaming)return;
+  const sel=window.getSelection?window.getSelection().toString():'';
+  const target=sel||$('prose').value;
+  if(!target.trim()){showErr('Nothing to rewrite.');return;}
+  saveChapter();state.stopRequested=false;setStreaming(true);
+  if(!sel)$('prose').value='';
+  const p=buildPrompt($('chPromptInp').value,target,'rewrite',state.active+1);
+  streamGen(p,'rewrite',
+    chunk=>{$('prose').value+=chunk;$('prose').scrollTop=$('prose').scrollHeight;updateWC();saveChapter();},
+    ()=>{setStreaming(false);saveChapter();},
+    e=>{showErr('Rewrite error: '+e);setStreaming(false);}
+  );
+};
+
+$('bulkGenBtn').onclick=async()=>{
+  if(state.streaming)return;
+  saveChapter();
+  const count=Math.min(2000,Math.max(1,parseInt($('bulkCount').value)||10));
+  state.stopRequested=false;setStreaming(true);
+
+  const existing=state.chapters.length;
+  for(let i=existing;i<existing+count;i++){
+    state.chapters.push({id:Date.now()+i,title:`Chapter ${i+1}`,prompt:'',prose:''});
+  }
+  renderTabs();
+
+  $('pbWrap').style.display='block';
+  const bprog=$('bulkProg');bprog.style.display='block';bprog.innerHTML='';
+
+  const items=[];
+  for(let i=existing;i<existing+count;i++){
+    const d=document.createElement('div');d.className='bulk-item';
+    const dot=document.createElement('span');dot.className='bulk-dot';dot.id='bdot-'+i;
+    const lbl=document.createElement('span');lbl.textContent=state.chapters[i].title||`Chapter ${i+1}`;
+    d.appendChild(dot);d.appendChild(lbl);bprog.appendChild(d);items.push(i);
+  }
+
+  for(let idx=0;idx<items.length;idx++){
+    if(state.stopRequested)break;
+    const chIdx=items[idx];
+    const dot=$('bdot-'+chIdx);if(dot)dot.className='bulk-dot active';
+    loadChapter(chIdx);$('prose').value='';
+
+    $('pbFill').style.width=Math.round((idx/items.length)*100)+'%';
+    $('pbLabel').textContent=`Chapter ${chIdx+1} of ${existing+count} — generating…`;
+
+    const chNum=chIdx+1;
+    const p=buildPrompt(state.chapters[chIdx].prompt,'','generate',chNum);
+
+    await new Promise(resolve=>{
+      streamGen(p,'generate',
+        chunk=>{$('prose').value+=chunk;$('prose').scrollTop=$('prose').scrollHeight;updateWC();saveChapter();},
+        ()=>{saveChapter();if(dot)dot.className='bulk-dot done';resolve();},
+        e=>{showErr(`Ch ${chNum} error: ${e}`);if(dot)dot.className='bulk-dot err';resolve();}
+      );
+    });
+  }
+
+  $('pbFill').style.width='100%';
+  $('pbLabel').textContent=state.stopRequested?'Stopped.':'All chapters generated.';
+  setTimeout(()=>{$('pbWrap').style.display='none';$('bulkProg').style.display='none';},4000);
+  setStreaming(false);
+};
+
+$('exportBtn').onclick=()=>{
+  saveChapter();
+  const title=$('novelTitle').value||'Novel';
+  let txt=title.toUpperCase()+'\n'+'═'.repeat(Math.min(title.length,60))+'\n\n';
+  state.chapters.forEach((c,i)=>{
+    const hdr=c.title||`Chapter ${i+1}`;
+    txt+=hdr+'\n'+'─'.repeat(Math.min(hdr.length,40))+'\n\n'+(c.prose||'')+'\n\n\n';
+  });
+  const blob=new Blob([txt],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=title.replace(/\s+/g,'_')+'.txt';a.click();
+};
+
+$('wpcSlider').oninput=e=>$('wpcVal').textContent=e.target.value;
+$('tempSlider').oninput=e=>$('tempVal').textContent=parseFloat(e.target.value).toFixed(1);
+$('prose').addEventListener('input',()=>{updateWC();saveChapter();});
+$('chTitle').addEventListener('input',()=>{saveChapter();renderTabs();});
+$('chPromptInp').addEventListener('input',saveChapter);
+$('ollamaUrl').addEventListener('change',checkOllama);
+
+document.querySelectorAll('.gbtn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.gbtn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');state.genre=b.dataset.g;
+});
+document.querySelectorAll('.tpill').forEach(p=>p.onclick=()=>{
+  document.querySelectorAll('.tpill').forEach(x=>x.classList.remove('active'));
+  p.classList.add('active');state.tone=p.dataset.t;
+});
+
+renderTabs();updateWC();checkOllama();setInterval(checkOllama,15000);
+</script>
